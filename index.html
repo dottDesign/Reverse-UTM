@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Adler University UTM Reverse Parser</title>
+  <link rel="icon" type="image/x-icon" href="https://www.adler.edu/wp-content/uploads/2025/07/favicon-150x150.png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root{
+      --adler-red:#b91c1c;
+      --adler-charcoal:#111827;
+      --adler-gray-100:#f3f4f6;
+      --adler-gray-200:#e5e7eb;
+      --adler-gray-400:#9ca3af;
+      --adler-gray-600:#4b5563;
+
+      --radius-lg:16px;
+      --radius-md:10px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{
+      box-sizing:border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--adler-gray-100);
+      color:var(--adler-charcoal);
+      display:flex;
+      justify-content:center;
+      padding:32px 16px;
+    }
+
+    .page{
+      width:100%;
+      max-width:1200px;
+    }
+
+    .site-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:24px;
+      gap:16px;
+    }
+
+    .site-brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .brand-mark{
+      width:32px;
+      height:32px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:transparent;
+      padding:0;
+    }
+
+    .brand-mark img.brand-icon{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .brand-text-main{
+      font-size:1.05rem;
+      font-weight:600;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .brand-text-sub{
+      font-size:.8rem;
+      color:var(--adler-gray-600);
+    }
+
+    .tool-title{
+      text-align:right;
+    }
+
+    .tool-title-main{
+      font-size:1.2rem;
+      font-weight:600;
+    }
+
+    .tool-title-sub{
+      font-size:.85rem;
+      color:var(--adler-gray-600);
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--adler-gray-200);
+      box-shadow:0 14px 30px rgba(15,23,42,.06);
+      padding:20px 20px 18px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.4fr);
+      gap:18px;
+    }
+
+    @media (max-width: 900px){
+      body{ padding-top:20px; }
+      .grid{ grid-template-columns:1fr; }
+      .tool-title{ text-align:left; }
+    }
+
+    .panel{
+      background:#fff;
+      border:1px solid var(--adler-gray-200);
+      padding:14px;
+    }
+
+    .panel-title{
+      font-size:.8rem;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:.09em;
+      color:var(--adler-gray-600);
+      margin-bottom:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    label{
+      display:block;
+      font-size:.8rem;
+      font-weight:500;
+      margin-bottom:4px;
+      color:var(--adler-gray-600);
+    }
+
+    textarea{
+      width:100%;
+      min-height:90px;
+      resize:vertical;
+      padding:10px 12px;
+      border-radius:var(--radius-md);
+      border:1px solid var(--adler-gray-200);
+      background:#fff;
+      color:var(--adler-charcoal);
+      font-size:.9rem;
+      outline:none;
+      transition:border-color .14s ease, box-shadow .14s ease;
+      font-family: var(--mono);
+      line-height:1.35;
+    }
+
+    textarea::placeholder{
+      color:var(--adler-gray-400);
+      font-size:.85rem;
+      font-family: var(--mono);
+    }
+
+    textarea:focus{
+      border-color:var(--adler-red);
+      box-shadow:0 0 0 1px rgba(185,28,28,.18);
+    }
+
+    .hint{
+      font-size:.75rem;
+      color:var(--adler-gray-600);
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    .button-row{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    button{
+      border:none;
+      font-size:.9rem;
+      padding:8px 16px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:500;
+      letter-spacing:.02em;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease, border-color .12s ease;
+    }
+
+    button.primary{
+      background:var(--adler-red);
+      color:#fff;
+      box-shadow:0 10px 20px rgba(185,28,28,.25);
+      border-radius:var(--radius-md);
+    }
+
+    button.primary:hover{
+      background:#991b1b;
+      transform: translateY(-1px);
+      box-shadow:0 14px 26px rgba(185,28,28,.30);
+    }
+
+    button.secondary{
+      background:#fff;
+      color:var(--adler-gray-600);
+      border:1px solid var(--adler-gray-200);
+      border-radius:var(--radius-md);
+    }
+
+    button.ghost{
+      background:#fff;
+      color:var(--adler-gray-600);
+      border:1px solid var(--adler-gray-200);
+      border-radius:var(--radius-md);
+    }
+
+    button.small{
+      font-size:.82rem;
+      padding:7px 12px;
+      border-radius:999px;
+      border:1px solid var(--adler-gray-200);
+      background:var(--adler-gray-100);
+      color:var(--adler-gray-600);
+    }
+
+    .output-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .chip-row{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      font-size:.75rem;
+    }
+
+    .chip{
+      border-radius:999px;
+      padding:4px 8px;
+      border:1px solid var(--adler-gray-200);
+      background:var(--adler-gray-100);
+      color:var(--adler-gray-600);
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .chip-key{
+      color:var(--adler-charcoal);
+      font-weight:500;
+    }
+
+    .output-box{
+      background:#fff;
+      border-radius:var(--radius-md);
+      border:1px solid var(--adler-gray-200);
+      padding:10px 12px;
+      font-size:.85rem;
+      color:var(--adler-charcoal);
+      word-break:break-all;
+      min-height:46px;
+      display:flex;
+      align-items:center;
+      font-family: var(--mono);
+      line-height:1.35;
+    }
+
+    .output-box.empty{
+      color:var(--adler-gray-400);
+    }
+
+    .rows{
+      display:grid;
+      gap:10px;
+    }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:start;
+      border-bottom:1px dashed var(--adler-gray-200);
+      padding:10px 0;
+    }
+    .kv:last-child{ border-bottom:none; padding-bottom:0; }
+
+    .k{
+      font-weight:600;
+      font-size:.85rem;
+      color:var(--adler-charcoal);
+    }
+
+    .v{
+      font-family:var(--mono);
+      font-size:.85rem;
+      color:var(--adler-gray-600);
+      white-space:pre-wrap;
+      word-break:break-word;
+      line-height:1.35;
+    }
+
+    .toast{
+      position:fixed;
+      bottom:16px;
+      left:50%;
+      transform:translateX(-50%);
+      background:var(--adler-charcoal);
+      color:#fff;
+      padding:10px 12px;
+      border-radius:999px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .18s ease;
+      font-size:13px;
+      box-shadow:0 10px 25px rgba(0,0,0,.25);
+    }
+    .toast.show{opacity:1}
+
+    .footer-hint{
+      margin-top:12px;
+      font-size:.75rem;
+      color:var(--adler-gray-600);
+      text-align:right;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="site-brand">
+        <div class="brand-mark" aria-hidden="true">
+          <img src="https://www.adler.edu/wp-content/uploads/2025/07/favicon-300x300.png" alt="Adler favicon" class="brand-icon">
+        </div>
+        <div class="brand-text">
+          <div class="brand-text-main">Adler University</div>
+          <div class="brand-text-sub">Marketing and Communications</div>
+        </div>
+      </div>
+
+      <div class="tool-title">
+        <div class="tool-title-main">UTM Reverse Parser</div>
+        <div class="tool-title-sub">Extract UTMs and rebuild clean URLs</div>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="grid">
+        <section class="panel">
+          <div class="panel-title">
+            <span>Input</span>
+            <span class="chip"><span class="chip-key" id="statusLabel">Ready</span></span>
+          </div>
+
+          <label for="inputUrl">Tracked URL</label>
+          <textarea id="inputUrl" placeholder="Paste a full URL, e.g. https://example.com/page?utm_source=facebook&utm_medium=social&utm_campaign=fall_2026&ref=sidebar"></textarea>
+
+          <div class="button-row">
+            <button class="primary" id="parseBtn">Parse</button>
+            <button class="secondary" id="pasteBtn">Paste from clipboard</button>
+            <button class="ghost" id="clearBtn">Clear</button>
+          </div>
+
+          <div class="hint">
+            Tip: UTMs are detected by <strong>utm_</strong> plus common click IDs like <strong>gclid</strong>, <strong>fbclid</strong>, <strong>msclkid</strong>.
+            Press Ctrl+Enter (or Cmd+Enter) to parse.
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="output-header">
+            <div class="panel-title" style="margin:0;">
+              <span>Destination</span>
+            </div>
+            <button class="small" id="copyCleanBtn">Copy clean URL</button>
+          </div>
+
+          <div class="rows">
+            <div>
+              <div class="hint" style="margin:0 0 6px;">Base URL (scheme + host + path)</div>
+              <div class="output-box empty" id="baseUrl">-</div>
+            </div>
+
+            <div>
+              <div class="hint" style="margin:0 0 6px;">Clean URL (non-marketing params only)</div>
+              <div class="output-box empty" id="cleanUrl">-</div>
+            </div>
+
+            <div>
+              <div class="hint" style="margin:0 0 6px;">Rebuilt URL (all params in canonical order)</div>
+              <div class="output-box empty" id="rebuiltUrl">-</div>
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div class="output-header">
+            <div class="panel-title" style="margin:0;">
+              <span>Quick Summary</span>
+            </div>
+          </div>
+
+          <div class="chip-row" style="margin-bottom:8px;">
+            <span class="chip"><span class="chip-key">UTMs</span> <span id="utmCount">0</span></span>
+            <span class="chip"><span class="chip-key">Other</span> <span id="otherCount">0</span></span>
+            <span class="chip"><span class="chip-key">Click IDs</span> <span id="hasClickIds">No</span></span>
+          </div>
+
+          <div class="hint" style="margin:0 0 6px;">Validation</div>
+          <div class="output-box empty" id="validation">-</div>
+        </section>
+      </div>
+
+      <div style="height:18px;"></div>
+
+      <section class="panel">
+        <div class="output-header">
+          <div class="panel-title" style="margin:0;">
+            <span>UTM and Marketing Parameters</span>
+          </div>
+          <div class="chip-row">
+            <span class="chip"><span class="chip-key" id="utmPill">0 found</span></span>
+          </div>
+        </div>
+        <div id="utmBox" class="rows"></div>
+      </section>
+
+      <div style="height:14px;"></div>
+
+      <section class="panel">
+        <div class="output-header">
+          <div class="panel-title" style="margin:0;">
+            <span>Non-UTM Parameters</span>
+          </div>
+          <div class="chip-row">
+            <span class="chip"><span class="chip-key" id="otherPill">0 found</span></span>
+          </div>
+        </div>
+        <div id="otherBox" class="rows"></div>
+      </section>
+
+      <div class="footer-hint">Utility: UTM Reverse Parser</div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script>
+    const input = document.getElementById("inputUrl");
+    const parseBtn = document.getElementById("parseBtn");
+    const pasteBtn = document.getElementById("pasteBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const baseUrlEl = document.getElementById("baseUrl");
+    const cleanUrlEl = document.getElementById("cleanUrl");
+    const rebuiltUrlEl = document.getElementById("rebuiltUrl");
+
+    const utmBox = document.getElementById("utmBox");
+    const otherBox = document.getElementById("otherBox");
+
+    const statusLabel = document.getElementById("statusLabel");
+    const utmPill = document.getElementById("utmPill");
+    const otherPill = document.getElementById("otherPill");
+
+    const utmCountEl = document.getElementById("utmCount");
+    const otherCountEl = document.getElementById("otherCount");
+    const hasClickIdsEl = document.getElementById("hasClickIds");
+    const validationEl = document.getElementById("validation");
+
+    const copyCleanBtn = document.getElementById("copyCleanBtn");
+
+    const toast = document.getElementById("toast");
+
+    const marketingKeys = new Set([
+      "utm_source","utm_medium","utm_campaign","utm_term","utm_content","utm_id",
+      "gclid","gbraid","wbraid","fbclid","msclkid","ttclid","twclid","li_fat_id",
+      "yclid","_gl"
+    ]);
+
+    // REQUIRED ORDER: Source, Medium, Campaign, Term, Content
+    const utmPriority = ["utm_source","utm_medium","utm_campaign","utm_term","utm_content"];
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 900);
+    }
+
+    function setBox(el, value){
+      el.textContent = value;
+      el.classList.toggle("empty", !value || value === "-");
+    }
+
+    function normalizeUrl(raw){
+      const trimmed = (raw || "").trim();
+      if (!trimmed) return "";
+      if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)) return trimmed;
+      return "https://" + trimmed;
+    }
+
+    function safeDecode(value){
+      try { return decodeURIComponent(value.replace(/\+/g, "%20")); }
+      catch { return value; }
+    }
+
+    function isMarketingParam(key){
+      const k = key.toLowerCase();
+      if (k.startsWith("utm_")) return true;
+      return marketingKeys.has(k);
+    }
+
+    function validateUtm(utm){
+      const issues = [];
+      const required = ["utm_source","utm_medium","utm_campaign"];
+      for (const r of required){
+        if (!utm[r] || !utm[r].trim()) issues.push(`Missing ${r}`);
+      }
+      if (utm.utm_medium && /\s/.test(utm.utm_medium)) issues.push("utm_medium contains spaces (use underscores)");
+      if (utm.utm_campaign && /[A-Z]/.test(utm.utm_campaign)) issues.push("utm_campaign contains uppercase (recommend lowercase)");
+      return issues.length ? issues.join("; ") : "Looks good";
+    }
+
+    function makeKVRow(key, value){
+      const decoded = safeDecode(value);
+
+      const row = document.createElement("div");
+      row.className = "kv";
+
+      const left = document.createElement("div");
+      const k = document.createElement("div");
+      k.className = "k";
+      k.textContent = key;
+
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = decoded !== value ? "Decoded value shown; encoded value preserved in URL." : "Value";
+
+      left.appendChild(k);
+      left.appendChild(hint);
+
+      const right = document.createElement("div");
+      right.style.display = "grid";
+      right.style.gap = "8px";
+      right.style.justifyItems = "end";
+
+      const v = document.createElement("div");
+      v.className = "v";
+      v.textContent = decoded;
+
+      const btn = document.createElement("button");
+      btn.className = "small";
+      btn.textContent = "Copy";
+      btn.addEventListener("click", async () => {
+        await navigator.clipboard.writeText(decoded);
+        showToast(`Copied ${key}`);
+      });
+
+      right.appendChild(v);
+      right.appendChild(btn);
+
+      row.appendChild(left);
+      row.appendChild(right);
+
+      return row;
+    }
+
+    function renderBox(boxEl, entries){
+      boxEl.innerHTML = "";
+      if (!entries.length){
+        const empty = document.createElement("div");
+        empty.className = "hint";
+        empty.textContent = "None found.";
+        boxEl.appendChild(empty);
+        return;
+      }
+      for (const [k,v] of entries){
+        boxEl.appendChild(makeKVRow(k, v));
+      }
+    }
+
+    function canonicalizeParams(params){
+      const entries = Array.from(params.entries());
+      entries.sort((a,b) => {
+        const ak = a[0].toLowerCase(), bk = b[0].toLowerCase();
+        if (ak < bk) return -1;
+        if (ak > bk) return 1;
+        return (a[1] || "").localeCompare(b[1] || "");
+      });
+      return entries;
+    }
+
+    function sortUtmEntries(utmEntries){
+      return utmEntries.slice().sort((a, b) => {
+        const ak = a[0].toLowerCase();
+        const bk = b[0].toLowerCase();
+
+        const ai = utmPriority.indexOf(ak);
+        const bi = utmPriority.indexOf(bk);
+
+        if (ai !== -1 && bi !== -1) return ai - bi;
+        if (ai !== -1) return -1;
+        if (bi !== -1) return 1;
+
+        return ak.localeCompare(bk);
+      });
+    }
+
+    function parse(){
+      const raw = normalizeUrl(input.value);
+      if (!raw){
+        statusLabel.textContent = "Paste a URL";
+        return;
+      }
+
+      let url;
+      try { url = new URL(raw); }
+      catch {
+        statusLabel.textContent = "Invalid URL";
+        return;
+      }
+
+      statusLabel.textContent = "Parsed";
+
+      const baseUrl = `${url.protocol}//${url.host}${url.pathname}`;
+      setBox(baseUrlEl, baseUrl);
+
+      const utmEntries = [];
+      const otherEntries = [];
+
+      for (const [k,v] of url.searchParams.entries()){
+        (isMarketingParam(k) ? utmEntries : otherEntries).push([k, v]);
+      }
+
+      const utmSorted = sortUtmEntries(utmEntries);
+      const otherSorted = otherEntries.slice().sort((a,b)=>a[0].localeCompare(b[0]));
+
+      renderBox(utmBox, utmSorted);
+      renderBox(otherBox, otherSorted);
+
+      utmPill.textContent = `${utmSorted.length} found`;
+      otherPill.textContent = `${otherSorted.length} found`;
+
+      utmCountEl.textContent = String(utmSorted.length);
+      otherCountEl.textContent = String(otherSorted.length);
+
+      const clickIdKeys = ["gclid","gbraid","wbraid","fbclid","msclkid","ttclid","twclid","li_fat_id","yclid"];
+      const hasClick = utmSorted.some(([k,_]) => clickIdKeys.includes(k.toLowerCase()));
+      hasClickIdsEl.textContent = hasClick ? "Yes" : "No";
+
+      const clean = new URL(baseUrl);
+      for (const [k,v] of otherSorted){
+        clean.searchParams.append(k, v);
+      }
+      setBox(cleanUrlEl, clean.toString());
+
+      const rebuilt = new URL(baseUrl);
+      const allParams = new URLSearchParams(url.search);
+      const canon = canonicalizeParams(allParams);
+      for (const [k,v] of canon){
+        rebuilt.searchParams.append(k, v);
+      }
+      setBox(rebuiltUrlEl, rebuilt.toString());
+
+      const utmObj = {};
+      for (const [k,v] of utmSorted) utmObj[k.toLowerCase()] = safeDecode(v);
+
+      setBox(validationEl, validateUtm(utmObj));
+    }
+
+    parseBtn.addEventListener("click", parse);
+
+    input.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") parse();
+    });
+
+    pasteBtn.addEventListener("click", async () => {
+      try{
+        const text = await navigator.clipboard.readText();
+        if (text) input.value = text;
+        parse();
+      } catch {
+        showToast("Clipboard access blocked");
+      }
+    });
+
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      utmBox.innerHTML = "";
+      otherBox.innerHTML = "";
+
+      setBox(baseUrlEl, "-");
+      setBox(cleanUrlEl, "-");
+      setBox(rebuiltUrlEl, "-");
+
+      utmPill.textContent = "0 found";
+      otherPill.textContent = "0 found";
+
+      utmCountEl.textContent = "0";
+      otherCountEl.textContent = "0";
+      hasClickIdsEl.textContent = "No";
+
+      setBox(validationEl, "-");
+
+      statusLabel.textContent = "Ready";
+    });
+
+    copyCleanBtn.addEventListener("click", async () => {
+      const val = cleanUrlEl.textContent || "";
+      if (val && val !== "-"){
+        await navigator.clipboard.writeText(val);
+        showToast("Copied clean URL");
+      }
+    });
+  </script>
+</body>
+</html>
